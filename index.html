@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <title>Enterprise AI Control Center</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; background-color: #2c3e50; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h1, h2, h3 { margin-top: 0; }
+        .stat-number { font-size: 36px; font-weight: bold; color: #3498db; }
+        
+        /* Chat Interface */
+        .chat-box { height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px; margin-bottom: 10px; background: #fafafa; }
+        .message { margin-bottom: 10px; padding: 10px; border-radius: 8px; max-width: 80%; }
+        .user-msg { background: #3498db; color: white; margin-left: auto; }
+        .ai-msg { background: #e0e0e0; color: black; margin-right: auto; }
+        
+        .input-group { display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #27ae60; }
+        
+        .workflow-job { border-left: 4px solid #f39c12; padding: 10px; background: #fdfae6; margin-bottom: 10px; }
+        .btn-approve { background: #2ecc71; }
+        .btn-reject { background: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🏢 Enterprise AI Control Center</h1>
+        <div id="tenant-badge">Tenant: TENANT_ACME_CORP</div>
+    </div>
+
+    <div class="grid">
+        <!-- Business Intelligence Dashboard -->
+        <div class="card">
+            <h2>📊 System Analytics</h2>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                <div>
+                    <div style="color: #7f8c8d; font-size: 14px;">Data Sources</div>
+                    <div class="stat-number">24</div>
+                </div>
+                <div>
+                    <div style="color: #7f8c8d; font-size: 14px;">AI Queries</div>
+                    <div class="stat-number">8,421</div>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <div>
+                    <div style="color: #7f8c8d; font-size: 14px;">Successful Jobs</div>
+                    <div class="stat-number" style="color: #2ecc71;">97.8%</div>
+                </div>
+                <div>
+                    <div style="color: #7f8c8d; font-size: 14px;">Avg Latency</div>
+                    <div class="stat-number" style="color: #9b59b6;">1.8s</div>
+                </div>
+            </div>
+            <hr style="border: 1px solid #eee; margin: 20px 0;">
+            <div style="color: #7f8c8d; font-size: 14px; margin-bottom: 5px;">AI Automation Rate</div>
+            <div style="background: #ecf0f1; border-radius: 10px; height: 10px; overflow: hidden;">
+                <div style="background: #3498db; width: 67%; height: 100%;"></div>
+            </div>
+        </div>
+
+        <!-- RAG Chat / Agent Input -->
+        <div class="card">
+            <h2>🤖 Enterprise Assistant</h2>
+            <div class="chat-box" id="chatBox">
+                <div class="message ai-msg">Hello! I am connected to the Enterprise Knowledge Base and the Agentic Workflow Engine. How can I assist you today?</div>
+            </div>
+            <div class="input-group">
+                <input type="text" id="userInput" placeholder="Ask a question or request a workflow..." onkeypress="if(event.key === 'Enter') sendQuery()">
+                <button onclick="sendQuery()">Send</button>
+            </div>
+        </div>
+
+        <!-- Workflow Approvals -->
+        <div class="card">
+            <h2>✅ Pending Approvals</h2>
+            <div id="approvalsList">
+                <div class="workflow-job" id="mockJob">
+                    <strong>Action Required: Send Payment Reminders</strong><br>
+                    <p style="font-size: 14px; color: #555;">AI found 2 invoices overdue by > 30 days. Recommends sending automated email reminders.</p>
+                    <div style="font-family: monospace; background: #fff; padding: 5px; font-size: 12px; margin-bottom: 10px;">
+                        {"action": "EMAIL_REMINDER", "targets": ["INV-1029", "INV-1033"]}
+                    </div>
+                    <button class="btn-approve" onclick="document.getElementById('mockJob').style.display='none'; alert('Job Approved & Executed!')">APPROVE</button>
+                    <button class="btn-reject" onclick="document.getElementById('mockJob').style.display='none'">REJECT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // In a real app, this would be fetched from a login endpoint
+    const mockJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJyb2xlIjoiQURNSU4iLCJ0ZW5hbnRJZCI6IlRFTkFOVF8xMjMiLCJleHAiOjQxMzM5ODA4MDB9.P7Mh3_Q1sYwT-G6_lR_lWl4QO1Q23b9dO7qE_Yn2XwY";
+
+    function appendMessage(sender, text) {
+        const chatBox = document.getElementById('chatBox');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message ' + (sender === 'user' ? 'user-msg' : 'ai-msg');
+        msgDiv.innerText = text;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendQuery() {
+        const input = document.getElementById('userInput');
+        const query = input.value.trim();
+        if (!query) return;
+
+        appendMessage('user', query);
+        input.value = '';
+        appendMessage('ai', 'Thinking...');
+
+        try {
+            // Dynamically get the current IP address (so it works on mobile!)
+            const backendUrl = 'http://' + window.location.hostname + ':8080/api/v1/knowledge/query';
+            
+            const response = await fetch(backendUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + mockJwt,
+                    'X-Tenant-ID': 'TENANT_123',
+                    'Content-Type': 'text/plain'
+                },
+                body: query
+            });
+
+            if (!response.ok) throw new Error('API Error');
+            const data = await response.text();
+            
+            // Remove the "Thinking..." message
+            document.getElementById('chatBox').lastChild.remove();
+            appendMessage('ai', data);
+
+        } catch (error) {
+            document.getElementById('chatBox').lastChild.remove();
+            appendMessage('ai', 'Error connecting to the backend. Ensure Docker is running!');
+        }
+    }
+
+    // Register PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').then(reg => {
+                console.log('PWA ServiceWorker registration successful');
+            });
+        });
+    }
+</script>
+</body>
+</html>
